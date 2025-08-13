@@ -1,5 +1,5 @@
 # Taller-Gramatica
-#### Codigo en Python ####
+### Codigo en Python ###
 ```python
 import re
 
@@ -30,3 +30,4 @@ if __name__ == "__main__":
             result = "acepta" if check_grammar(grammar_id, line) else "NO acepta"
             print(f"{line} -> {result}")
 ```
+### Codigo en C ###
