@@ -2,11 +2,10 @@ import re
 
 def check_grammar(grammar_id, input_string):
     patterns = {
-        'G1': r'^(0|1)((0|1)*\1)?$',  # Capicuas binarios (ej: 010, 11011)
-        'G2': r'^a*b+$',              # a^n b^{n+1} (ej: ab, aabbb)
-        'G3': r'^abb$',               # Solo "abb"
-        'G4': r'^(ab|abb)$',          # "ab" o "abb"
-        'G5': r'^a(ab)*b$'            # a(ab)^n b (ej: ab, aababb)
+        'G1': r'^(0|1)((0|1)*\1)?$', 
+        'G2': r'^a*b+$',              
+        'G3': r'^abb$',                      
+        'G5': r'^a(ab)*b$'            
     }
     
     if grammar_id not in patterns:
@@ -26,3 +25,4 @@ if __name__ == "__main__":
                 continue
             result = "acepta" if check_grammar(grammar_id, line) else "NO acepta"
             print(f"{line} -> {result}")
+
