@@ -1,0 +1,6 @@
+abb
+ab   # NO acepta
+aabb   # NO acepta
+abbc   # NO acepta
+a   # NO acepta
+b   # NO acepta
