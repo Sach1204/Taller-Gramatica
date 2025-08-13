@@ -1,0 +1,7 @@
+010
+11011 
+10101
+1001
+011 #No Acepta
+1010 #No Acepta
+0001 #No Acepta
