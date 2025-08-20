@@ -32,68 +32,75 @@ if __name__ == "__main__":
 ```
 ### Codigo en C ###
 ```c
-
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include <regex.h>
+#include <stdbool.h>
 
-bool check_regex(const char *pattern, const char *input) {
-    regex_t regex;
-    int ret = regcomp(&regex, pattern, REG_EXTENDED);
-    if (ret) return false;
-    ret = regexec(&regex, input, 0, NULL, 0);
-    regfree(&regex);
-    return ret == 0;
-}
+#define MAX_LINE 256
 
-int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        printf("Uso: %s <G1|G2|G3|G4|G5> <archivo.txt>\n", argv[0]);
-        return 1;
-    }
-
-    const char *patterns[] = {
-        "^(0|1)((0|1)*\\1)?$",  // G1
-        "^a*b+$",               // G2
-        "^abb$",                // G3
-        "^(ab|abb)$",           // G4
-        "^a(ab)*b$"             // G5
+// Función para validar usando regex
+bool check_grammar(const char *grammar_id, const char *input_string) {
+    const char *patterns[][2] = {
+        {"G1", "^(0|1)((0|1)*\\1)?$"},   // Capicuas binarios
+        {"G2", "^a*b+$"},                // a^n b^{n+1}
+        {"G3", "^abb$"},                 // Solo "abb"
+        {"G4", "^(ab|abb)$"},            // "ab" o "abb"
+        {"G5", "^a(ab)*b$"}              // a(ab)^n b
     };
 
-    int index = argv[1][1] - '1';  // Convierte "G1" -> 0, "G2" -> 1, etc.
-    if (index < 0 || index > 4) {
-        printf("Gramática no válida.\n");
-        return 1;
-    }
+    regex_t regex;
+    bool match = false;
+    int num_patterns = sizeof(patterns) / sizeof(patterns[0]);
 
-    FILE *file = fopen(argv[2], "r");
+    for (int i = 0; i < num_patterns; i++) {
+        if (strcmp(grammar_id, patterns[i][0]) == 0) {
+            if (regcomp(&regex, patterns[i][1], REG_EXTENDED) != 0) {
+                fprintf(stderr, "Error al compilar la expresión regular.\n");
+                return false;
+            }
+
+            if (regexec(&regex, input_string, 0, NULL, 0) == 0) {
+                match = true;
+            }
+
+            regfree(&regex);
+            break;
+        }
+    }
+    return match;
+}
+
+int main() {
+    const char *grammar_id = "G1";     // Seleccionamos la gramática
+    const char *file_path = "g1.txt"; // Archivo a leer
+    FILE *file = fopen(file_path, "r");
+
     if (!file) {
         perror("Error al abrir el archivo");
         return 1;
     }
 
-    char line[256];
+    char line[MAX_LINE];
     while (fgets(line, sizeof(line), file)) {
-        // Eliminar salto de línea
-        line[strcspn(line, "\n")] = '\0';
+        // Quitar salto de línea
+        line[strcspn(line, "\n")] = 0;
 
-        // Quitar comentarios (# ...)
+        // Quitar comentarios y espacios
         char *comment = strchr(line, '#');
         if (comment) *comment = '\0';
+        for (int i = strlen(line) - 1; i >= 0 && (line[i] == ' ' || line[i] == '\t'); i--)
+            line[i] = '\0';
 
-        // Eliminar espacios al inicio y fin
-        char *start = line;
-        while (*start == ' ' || *start == '\t') start++;
-        char *end = start + strlen(start) - 1;
-        while (end >= start && (*end == ' ' || *end == '\t')) *end-- = '\0';
+        if (strlen(line) == 0) continue;
 
-        if (strlen(start) == 0) continue; // Línea vacía después de limpiar
-
-        printf("%s -> %s\n", start, check_regex(patterns[index], start) ? "acepta" : "NO acepta");
+        bool result = check_grammar(grammar_id, line);
+        printf("%s -> %s\n", line, result ? "acepta" : "NO acepta");
     }
 
     fclose(file);
     return 0;
 }
+
 ```
